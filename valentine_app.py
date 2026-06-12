@@ -2,9 +2,8 @@ import streamlit as st
 import random
 import time
 
-# Configuração da página
-st.set_page_name("Para o meu Dengo")
-st.set_page_icon("💖")
+# Configuração da página (CORRIGIDO)
+st.set_page_config(page_title="Para o meu Dengo", page_icon="💖")
 
 # Adicionando um pouco de estilo romântico
 st.markdown("""
@@ -53,7 +52,7 @@ def move_no_button():
     new_top = f"{random.randint(10, 80)}%"
     new_left = f"{random.randint(10, 80)}%"
     st.session_state['app_state']['no_button_pos'] = {'top': new_top, 'left': new_left}
-    st.experimental_rerun()
+    st.rerun() # Atualizado de experimental_rerun para rerun
 
 # --- TELA 1: O PEDIDO ---
 if st.session_state['app_state']['asked'] and not st.session_state['app_state']['started']:
@@ -65,7 +64,7 @@ if st.session_state['app_state']['asked'] and not st.session_state['app_state'][
         if st.button("Sim, eu amo ele"):
             st.session_state['app_state']['asked'] = False
             st.session_state['app_state']['started'] = True
-            st.experimental_rerun()
+            st.rerun()
             
     with col2:
         # Posição do botão "Não" do estado
@@ -89,7 +88,7 @@ if st.session_state['app_state']['started'] and not st.session_state['app_state'
     
     q1_ans = st.text_input("Qual o nome completo do amor da sua vida?", placeholder="Nome completo aqui").strip().lower()
     q2_ans = st.text_input("Qual dia e mês (no formato DD/MM) que a gente começou a namorar?", placeholder="e.g., 01/01").strip()
-    q3_ans = st.text_input("Quanto que o amô ama você?", placeholder="Pense grande...").strip().lower()
+    q3_ans = st.text_input("Quanto que amô ama ela?", placeholder="Pense grande...").strip().lower()
     q4_ans = st.text_input("Onde a gente geralmente faz nossos dates?", placeholder="Aonde você quer ir?").strip().lower()
     
     if st.button("Enviar Respostas"):
@@ -109,7 +108,7 @@ if st.session_state['app_state']['started'] and not st.session_state['app_state'
             st.session_state['app_state']['started'] = False
             st.session_state['app_state']['finished'] = True
             st.balloons() # Confete de vitória
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.session_state['app_state']['error_count'] += 1
             error_messages = [
