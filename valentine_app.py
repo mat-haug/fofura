@@ -1,8 +1,8 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import random
-import time
 
-# Configuração da página (CORRIGIDO)
+# Configuração da página
 st.set_page_config(page_title="Para o meu Dengo", page_icon="💖")
 
 # Adicionando um pouco de estilo romântico
@@ -28,58 +28,64 @@ st.markdown("""
         border-radius: 10px;
         border: 2px solid #ff4b4b;
     }
-    /* Estilo para o botão "Não" pulando */
-    #no_button {
-        position: absolute;
-        width: 150px;
-        height: 50px;
-    }
 </style>
 """, unsafe_allow_html=True)
 
-# Mecanismo de estado para rastrear o progresso e a posição do botão
+# Mecanismo de estado para rastrear o progresso
 if 'app_state' not in st.session_state:
     st.session_state['app_state'] = {
         'asked': True,
         'started': False,
         'finished': False,
-        'no_button_pos': {'top': '60%', 'left': '60%'},
         'error_count': 0
     }
-
-def move_no_button():
-    # Gera novas posições aleatórias
-    new_top = f"{random.randint(10, 80)}%"
-    new_left = f"{random.randint(10, 80)}%"
-    st.session_state['app_state']['no_button_pos'] = {'top': new_top, 'left': new_left}
-    st.rerun() # Atualizado de experimental_rerun para rerun
 
 # --- TELA 1: O PEDIDO ---
 if st.session_state['app_state']['asked'] and not st.session_state['app_state']['started']:
     st.markdown('<p class="big-font">Você quer sair com o dengo para comemorar o dia dos namorados?</p>', unsafe_allow_html=True)
     
-    col1, col2 = st.columns(2)
+    col1, col2 = st.columns([1, 2]) # Deixando a coluna 2 maior pro botão ter espaço pra fugir
     
     with col1:
-        if st.button("Sim, eu amo ele"):
+        st.write("") # Espaçamento
+        st.write("")
+        if st.button("Sim, eu amo ele", type="primary"):
             st.session_state['app_state']['asked'] = False
             st.session_state['app_state']['started'] = True
             st.rerun()
             
     with col2:
-        # Posição do botão "Não" do estado
-        pos = st.session_state['app_state']['no_button_pos']
-        # Usando CSS inline para mover o botão
-        no_button_html = f"""
-        <div style="position: absolute; top: {pos['top']}; left: {pos['left']}; width: 150px; height: 50px;">
-            <button id="no_button" style="width: 100%; height: 100%; color: #4b4b4b; border: 1px solid #4b4b4b; border-radius: 4px; background-color: #ffcccc;">não, odeio ele</button>
+        # Botão Fujão usando HTML e JavaScript puro
+        btn_html = """
+        <div style="position: relative; width: 100%; height: 300px;">
+            <button id="btn-no" style="
+                position: absolute; 
+                top: 20px; 
+                left: 20px; 
+                padding: 10px 20px; 
+                border: 1px solid #ff4b4b; 
+                border-radius: 8px; 
+                background-color: #ffe0e0; 
+                color: #ff4b4b;
+                font-family: 'Open Sans', sans-serif;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: 0.1s; /* Movimento suave */
+            ">não, odeio ele</button>
         </div>
+        <script>
+            const btn = document.getElementById('btn-no');
+            btn.addEventListener('mouseover', function() {
+                // Sorteia novas posições quando o mouse passa por cima
+                const newTop = Math.random() * 250; 
+                const newLeft = Math.random() * 300; 
+                btn.style.top = newTop + 'px';
+                btn.style.left = newLeft + 'px';
+            });
+        </script>
         """
-        st.markdown(no_button_html, unsafe_allow_html=True)
-        # O botão "Não" é apenas visual, o JavaScript no navegador não move ele nativamente no Streamlit
-        # Vamos fazer o Streamlit re-renderizar em um clique normal.
-        if st.button("não, odeio ele"):
-            move_no_button()
+        components.html(btn_html, height=350)
 
 # --- TELA 2: O QUIZ ---
 if st.session_state['app_state']['started'] and not st.session_state['app_state']['finished']:
@@ -92,22 +98,20 @@ if st.session_state['app_state']['started'] and not st.session_state['app_state'
     q4_ans = st.text_input("Onde a gente geralmente faz nossos dates?", placeholder="Aonde você quer ir?").strip().lower()
     
     if st.button("Enviar Respostas"):
-        # Respostas Corretas (normalizadas)
         correct_a1 = "matheus haug"
         correct_a2 = "07/06"
         correct_a3 = "infinito"
         correct_a4 = "madeiro"
         
-        # Lógica de verificação
         is_q1_correct = q1_ans == correct_a1
         is_q2_correct = q2_ans == correct_a2
-        is_q3_correct = q3_ans == correct_a3 or "muito" in q3_ans or "pra caramba" in q3_ans # Toque de flexibilidade
+        is_q3_correct = q3_ans == correct_a3 or "muito" in q3_ans or "pra caramba" in q3_ans 
         is_q4_correct = q4_ans == correct_a4
         
         if is_q1_correct and is_q2_correct and is_q3_correct and is_q4_correct:
             st.session_state['app_state']['started'] = False
             st.session_state['app_state']['finished'] = True
-            st.balloons() # Confete de vitória
+            st.balloons() 
             st.rerun()
         else:
             st.session_state['app_state']['error_count'] += 1
@@ -120,7 +124,7 @@ if st.session_state['app_state']['started'] and not st.session_state['app_state'
             ]
             error_msg = random.choice(error_messages)
             st.error(error_msg)
-            st.snow() # Neve para dar um gelinho no erro
+            st.snow()
 
 # --- TELA 3: A TELA FINAL COM FOTOS ---
 if st.session_state['app_state']['finished']:
@@ -133,8 +137,7 @@ if st.session_state['app_state']['finished']:
     </div>
     """, unsafe_allow_html=True)
     st.balloons()
-    
-    # Galeria de fotos
+        # Galeria de fotos
     st.markdown('<p class="quiz-question" style="text-align: center; margin-top: 30px;">Alguns dos nossos momentos...</p>', unsafe_allow_html=True)
     col1, col2 = st.columns(2)
     
